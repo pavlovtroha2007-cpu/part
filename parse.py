@@ -72,11 +72,18 @@ def parse(html):
     }
 
 
-def make_ics(data, subgroup=0, until="20261231T235959", remind_min=15):
+def semester_end(data):
+    """Конец семестра: осенний до 31 декабря, весенний до 30 июня"""
+    y, m = int(data["anchor"]["date"][:4]), int(data["anchor"]["date"][5:7])
+    return f"{y}1231T235959" if m >= 8 else f"{y}0630T235959"
+
+
+def make_ics(data, subgroup=0, until=None, remind_min=15):
     """Календарь .ics: каждая пара повторяется раз в 2 недели до конца семестра.
     subgroup=0 — все пары, 1 или 2 — без пар чужой подгруппы"""
     from datetime import timedelta
 
+    until = until or semester_end(data)
     anchor = datetime.strptime(data["anchor"]["date"], "%Y-%m-%d")
     anchor_mon = anchor - timedelta(days=anchor.weekday())
     lines = [
