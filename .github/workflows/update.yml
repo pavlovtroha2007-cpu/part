@@ -1,9 +1,9 @@
 name: Обновить расписание
 
 on:
-  schedule:
-    - cron: "0 23 * * *"
   workflow_dispatch:
+  push:
+    paths: ["page.html"]
 
 permissions:
   contents: write
@@ -17,12 +17,10 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install beautifulsoup4
-      - name: Скачать страницу группы
-        run: curl -sSL --max-time 30 -A "Mozilla/5.0" https://timetable.pallada.sibsau.ru/timetable/group/14344 -o page.html
       - run: python parse.py page.html data.json
-      - name: Закоммитить, если что-то поменялось
+      - name: Сохранить, если что-то поменялось
         run: |
           git config user.name "schedule-bot"
           git config user.email "bot@users.noreply.github.com"
           git add data.json schedule*.ics
-          git diff --cached --quiet || (git commit -m "Автообновление расписания" && git push)
+          git diff --cached --quiet || (git commit -m "Обновил расписание" && git push)
